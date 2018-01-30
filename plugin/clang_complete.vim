@@ -184,47 +184,14 @@ function! s:ClangCompleteInit()
     return
   endif
 
-  execute s:py_cmd 'snippetsInit()'
-
-  if g:clang_make_default_keymappings == 1
-    inoremap <expr> <buffer> <C-X><C-U> <SID>LaunchCompletion()
-    inoremap <expr> <buffer> . <SID>CompleteDot()
-    inoremap <expr> <buffer> > <SID>CompleteArrow()
-    inoremap <expr> <buffer> : <SID>CompleteColon()
-    execute "nnoremap <buffer> <silent> " . g:clang_jumpto_declaration_key . " :call <SID>GotoDeclaration(0)<CR><Esc>"
-    execute "nnoremap <buffer> <silent> " . g:clang_jumpto_declaration_in_preview_key . " :call <SID>GotoDeclaration(1)<CR><Esc>"
-    execute "nnoremap <buffer> <silent> " . g:clang_jumpto_back_key . " <C-O>"
-  endif
-
-  if g:clang_omnicppcomplete_compliance == 1
-    inoremap <expr> <buffer> <C-X><C-U> <SID>LaunchCompletion()
-  endif
-
-  " Force menuone. Without it, when there's only one completion result,
-  " it can be confusing (not completing and no popup)
-  if g:clang_auto_select != 2
-    set completeopt-=menu
-    set completeopt+=menuone
-  endif
-
   " Disable every autocmd that could have been set.
   augroup ClangComplete
     autocmd!
   augroup end
 
-  if g:clang_periodic_quickfix == 1
-    augroup ClangComplete
-      au CursorHold,CursorHoldI <buffer> call <SID>DoPeriodicQuickFix()
-    augroup end
-  endif
-
-  setlocal completefunc=ClangComplete
-  if g:clang_omnicppcomplete_compliance == 0
-    setlocal omnifunc=ClangComplete
-  endif
-
 endfunction
 
+"loads clang executable options from file
 function! LoadUserOptions()
   let b:clang_user_options = ''
 
@@ -308,6 +275,7 @@ function! s:processFilename(filename, root)
   return l:filename
 endfunction
 
+"used in 
 function! s:parseConfig()
   let l:local_conf = findfile('.clang_complete', getcwd() . ',.;')
   if l:local_conf == '' || !filereadable(l:local_conf)
@@ -406,48 +374,6 @@ function! s:initClangCompletePython()
   return 1
 endfunction
 
-function! s:DoPeriodicQuickFix()
-  " Don't do any superfluous reparsing.
-  if b:my_changedtick == b:changedtick
-    return
-  endif
-  let b:my_changedtick = b:changedtick
-
-  execute s:py_cmd 'updateCurrentDiagnostics()'
-  call s:ClangQuickFix()
-endfunction
-
-function! s:ClangQuickFix()
-  " Clear the bad spell, the user may have corrected them.
-  syntax clear SpellBad
-  syntax clear SpellLocal
-
-  execute s:py_cmd "vim.command('let l:list = ' + json.dumps(getCurrentQuickFixList()))"
-  execute s:py_cmd 'highlightCurrentDiagnostics()'
-
-  if g:clang_complete_copen == 1
-    " We should get back to the original buffer
-    let l:bufnr = bufnr('%')
-
-    " Workaround:
-    " http://vim.1045645.n5.nabble.com/setqflist-inconsistency-td1211423.html
-    if l:list == []
-      cclose
-    else
-      copen
-    endif
-
-    let l:winbufnr = bufwinnr(l:bufnr)
-    exe l:winbufnr . 'wincmd w'
-  endif
-  call setqflist(l:list)
-  silent doautocmd QuickFixCmdPost make
-endfunction
-
-function! s:escapeCommand(command)
-    return s:isWindows() ? a:command : escape(a:command, '()')
-endfunction
-
 function! s:isWindows()
   " Check for win32 is enough since it's true on win64
   return has('win32')
@@ -457,6 +383,8 @@ let b:col = 0
 
 function! ClangComplete(findstart, base)
   if a:findstart
+    "finding where to start completion
+
     let l:line = getline('.')
     let l:start = col('.') - 1
     let l:wsstart = l:start
@@ -470,35 +398,17 @@ function! ClangComplete(findstart, base)
     endwhile
     let b:col = l:start + 1
     return l:start
+
   else
+    "performing completion
+
     if g:clang_debug == 1
       let l:time_start = reltime()
     endif
 
-    execute s:py_cmd 'snippetsReset()'
-
     execute s:py_cmd "completions, timer = getCurrentCompletions(vim.eval('a:base'))"
     execute s:py_cmd "vim.command('let l:res = ' + completions)"
     execute s:py_cmd "timer.registerEvent('Load into vimscript')"
-
-    if g:clang_make_default_keymappings == 1
-      if s:use_maparg
-        let s:old_cr = maparg('<CR>', 'i', 0, 1)
-      else
-        let s:old_snr = matchstr(maparg('<CR>', 'i'), '<SNR>\d\+_')
-      endif
-      inoremap <expr> <buffer> <C-Y> <SID>HandlePossibleSelectionCtrlY()
-      inoremap <expr> <buffer> <CR> <SID>HandlePossibleSelectionEnter()
-    endif
-    augroup ClangComplete
-      au CursorMovedI <buffer> call <SID>TriggerSnippet()
-      if exists('##CompleteDone')
-        au CompleteDone,InsertLeave <buffer> call <SID>StopMonitoring()
-      else
-        au InsertLeave <buffer> call <SID>StopMonitoring()
-      endif
-    augroup end
-    let b:snippet_chosen = 0
 
     execute s:py_cmd 'timer.finish()'
 
@@ -507,153 +417,6 @@ function! ClangComplete(findstart, base)
     endif
     return l:res
   endif
-endfunction
-
-function! s:HandlePossibleSelectionEnter()
-  if pumvisible()
-    let b:snippet_chosen = 1
-    return "\<C-Y>"
-  end
-  return "\<CR>"
-endfunction
-
-function! s:HandlePossibleSelectionCtrlY()
-  if pumvisible()
-    let b:snippet_chosen = 1
-  end
-  return "\<C-Y>"
-endfunction
-
-function! s:StopMonitoring()
-  if b:snippet_chosen
-    call s:TriggerSnippet()
-    return
-  endif
-
-  if g:clang_make_default_keymappings == 1
-    " Restore original return and Ctrl-Y key mappings
-
-    if s:use_maparg
-      if get(s:old_cr, 'buffer', 0)
-        silent! execute s:old_cr.mode.
-            \ (s:old_cr.noremap ? 'noremap '  : 'map').
-            \ (s:old_cr.buffer  ? '<buffer> ' : '').
-            \ (s:old_cr.expr    ? '<expr> '   : '').
-            \ (s:old_cr.nowait  ? '<nowait> ' : '').
-            \ s:old_cr.lhs.' '.
-            \ substitute(s:old_cr.rhs, '<SID>', '<SNR>'.s:old_cr.sid.'_', 'g')
-      else
-        silent! iunmap <buffer> <CR>
-      endif
-    else
-      silent! execute substitute(g:clang_restore_cr_imap, '<SID>', s:old_snr, 'g')
-    endif
-
-    silent! iunmap <buffer> <C-Y>
-  endif
-
-  augroup ClangComplete
-    au! CursorMovedI,InsertLeave <buffer>
-    if exists('##CompleteDone')
-      au! CompleteDone <buffer>
-    endif
-  augroup END
-endfunction
-
-function! s:TriggerSnippet()
-  " Dont bother doing anything until we're sure the user exited the menu
-  if !b:snippet_chosen
-    return
-  endif
-
-  " Stop monitoring as we'll trigger a snippet
-  let b:snippet_chosen = 0
-  call s:StopMonitoring()
-
-  " Trigger the snippet
-  execute s:py_cmd 'snippetsTrigger()'
-
-  if g:clang_close_preview
-    pclose
-  endif
-endfunction
-
-function! s:ShouldComplete()
-  if (getline('.') =~ '#\s*\(include\|import\)')
-    return 0
-  else
-    if col('.') == 1
-      return 1
-    endif
-    for l:id in synstack(line('.'), col('.') - 1)
-      if match(synIDattr(l:id, 'name'), '\CComment\|String\|Number')
-            \ != -1
-        return 0
-      endif
-    endfor
-    return 1
-  endif
-endfunction
-
-function! s:LaunchCompletion()
-  let l:result = ""
-  if s:ShouldComplete()
-    let l:result = "\<C-X>\<C-U>"
-    if g:clang_auto_select != 2
-      let l:result .= "\<C-P>"
-    endif
-    if g:clang_auto_select == 1
-      let l:result .= "\<C-R>=(pumvisible() ? \"\\<Down>\" : '')\<CR>"
-    endif
-  endif
-  return l:result
-endfunction
-
-function! s:CompleteDot()
-  if g:clang_complete_auto == 1
-    return '.' . s:LaunchCompletion()
-  endif
-  return '.'
-endfunction
-
-function! s:CompleteArrow()
-  if g:clang_complete_auto != 1 || getline('.')[col('.') - 2] != '-'
-    return '>'
-  endif
-  return '>' . s:LaunchCompletion()
-endfunction
-
-function! s:CompleteColon()
-  if g:clang_complete_auto != 1 || getline('.')[col('.') - 2] != ':'
-    return ':'
-  endif
-  return ':' . s:LaunchCompletion()
-endfunction
-
-function! s:GotoDeclaration(preview)
-  try
-    execute s:py_cmd "gotoDeclaration(vim.eval('a:preview') == '1')"
-  catch /^Vim\%((\a\+)\)\=:E37/
-    echoe "The current file is not saved, and 'hidden' is not set."
-          \ "Either save the file or add 'set hidden' in your vimrc."
-  endtry
-  return ''
-endfunction
-
-" May be used in a mapping to update the quickfix window.
-function! g:ClangUpdateQuickFix()
-  call s:DoPeriodicQuickFix()
-  return ''
-endfunction
-
-function! g:ClangGotoDeclaration()
-  call s:GotoDeclaration(0)
-  return ''
-endfunction
-
-function! g:ClangGotoDeclarationPreview()
-  call s:GotoDeclaration(1)
-  return ''
 endfunction
 
 " vim: set ts=2 sts=2 sw=2 expandtab :
