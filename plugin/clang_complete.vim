@@ -41,8 +41,8 @@ function! s:ClangCompleteInit()
   endif
 
   if exists('g:clang_use_library') && g:clang_use_library == 0
-    echoe "clang_complete: You can't use clang binary anymore."
-    echoe 'For more information see g:clang_use_library help.'
+    echoerr "clang_complete: You can't use clang binary anymore."
+    echoerr 'For more information see g:clang_use_library help.'
     return
   endif
 
@@ -70,26 +70,8 @@ function! s:ClangCompleteInit()
     let g:clang_periodic_quickfix = 0
   endif
 
-  if !exists('g:clang_snippets') || g:clang_snippets == 0
-    let g:clang_snippets_engine = 'dummy'
-  endif
-
-  if !exists('g:clang_snippets_engine')
-    let g:clang_snippets_engine = 'clang_complete'
-  endif
-
   if !exists('g:clang_user_options')
     let g:clang_user_options = ''
-  endif
-
-  if !exists('g:clang_conceal_snippets')
-    let g:clang_conceal_snippets = has('conceal')
-  elseif g:clang_conceal_snippets == 1 && !has('conceal')
-    echoe 'clang_complete: conceal feature not available but requested'
-  endif
-
-  if !exists('g:clang_complete_optional_args_in_snippets')
-    let g:clang_complete_optional_args_in_snippets = 0
   endif
 
   if !exists('g:clang_trailing_placeholder')
@@ -334,9 +316,9 @@ endfunction
 
 function! s:initClangCompletePython()
   if !has('python') && !has('python3')
-    echoe 'clang_complete: No python support available.'
-    echoe 'Cannot use clang library'
-    echoe 'Compile vim with python support to use libclang'
+    echoerr 'clang_complete: No python support available.'
+    echoerr 'Cannot use clang library'
+    echoerr 'Compile vim with python support to use libclang'
     return 0
   endif
 
@@ -347,20 +329,6 @@ function! s:initClangCompletePython()
 
     execute s:py_cmd 'sys.path = ["' . s:plugin_path . '"] + sys.path'
     execute s:pyfile_cmd fnameescape(s:plugin_path) . '/libclang.py'
-
-    try
-      execute s:py_cmd 'from snippets.' . g:clang_snippets_engine . ' import *'
-      let l:snips_loaded = 1
-    catch
-      let l:snips_loaded = 0
-    endtry
-    if l:snips_loaded == 0
-      " Oh yeah, vimscript rocks!
-      " Putting that echoe inside the catch, will throw an error, and
-      " display spurious unwanted errors…
-      echoe 'Snippets engine ' . g:clang_snippets_engine . ' not found'
-      return 0
-    endif
 
     execute s:py_cmd "vim.command('let l:res = ' + str(initClangComplete(vim.eval('g:clang_complete_lib_flags'),"
                                                     \."vim.eval('g:clang_compilation_database'),"
