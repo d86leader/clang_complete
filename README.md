@@ -2,16 +2,18 @@ This plugin uses clang for accurately completing C and C++ code.
 
 ## Installation
 
-- To build and install in one step, type: `$ make install`
-
-- To build and install in two steps, type:
-
+Use your favourite plugin manager or just drop all the files into the vim
+folder. Without plugin manager with Linux and Mac:
 ```
-$ make
-$ vim clang_complete.vmb -c 'so %' -c 'q'
+git clone https://github.com/d86leader/clang_complete.git && cp -r clang_complete/* ~/.vim/
 ```
-
-- Alternatively, you can also put the files in `~/.vim/`
+For Pathogen:
+```
+cd ~/.vim/bundle && git clone https://github.com/d86leader/clang_complete.git
+```
+For vim-plug and similar, add the following line to your vimrc file after initializing the manager:
+```
+Plug 'd86leader/clang_complete'
 
 You need Vim 7.3 or higher, compiled with python support and ideally, with
 the conceal feature.
@@ -42,23 +44,12 @@ the conceal feature.
 
 ## Usage
 
-The plugin provides list of matches, after that you pick completion from a
-generic completion menu where <kbd>Ctrl+N</kbd>, <kbd>Ctrl+P</kbd> and alike
-work and wrap around ends of list.
+This plugin provides an omnicompletion function. Set it as your c++ omnifunc:
+```
+setlocal omnifunc=ClangComplete
+```
+And then you can use it for completion with `C-x C-o`
 
 ## License
 
 See doc/clang_complete.txt for help and license.
-
-## Troubleshooting
-
-The first step is to check values of `'omnifunc'` and `'completefunc'` options
-in a C++ buffer where completion doesn't work (the value should be
-`ClangComplete`).  This can be done with the following command:
-`:set omnifunc? completefunc?`
-
-Output of `:messages` command after startup could also show something useful in
-case there were problems with plugin initialization.
-
-If everything is fine, next step might be to load only clang_complete plugin
-and see if anything changes.
