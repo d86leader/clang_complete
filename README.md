@@ -14,6 +14,7 @@ cd ~/.vim/bundle && git clone https://github.com/d86leader/clang_complete.git
 For vim-plug and similar, add the following line to your vimrc file after initializing the manager:
 ```
 Plug 'd86leader/clang_complete'
+```
 
 You need Vim 7.3 or higher, compiled with python support and ideally, with
 the conceal feature.
