@@ -94,94 +94,6 @@ Example .clang_complete file: >
 If set, clang_complete won't be loaded.
 Default: unset.
 
-       				       	*clang_complete-auto_select*
-				       	*g:clang_auto_select*
-If equal to 0, nothing is selected.
-If equal to 1, automatically select the first entry in the popup menu, but
-without inserting it into the code.
-If equal to 2, automatically select the first entry in the popup menu, and
-insert it into the code.
-Default: 0
-
-       				       	*clang_complete-complete_auto*
-       				       	*g:clang_complete_auto*
-If equal to 1, automatically complete after ->, ., ::
-Default: 1
-
-       				       	*clang_complete-copen*
-       				       	*g:clang_complete_copen*
-If equal to 1, open quickfix window on error.
-Default: 0
-
-       				       	*clang_complete-hl_errors*
-       				       	*g:clang_hl_errors*
-If equal to 1, it will highlight the warnings and errors the same way clang
-does it.
-Default: 1
-
-       				       	*clang_complete-periodic_quickfix*
-       				       	*g:clang_periodic_quickfix*
-If equal to 1, it will periodically update the quickfix window.
-Default: 0
-Note: You could use the g:ClangUpdateQuickFix() to do the same with a mapping.
-
-       				       	*clang_complete-snippets*
-       				       	*g:clang_snippets*
-If equal to 1, it will do some snippets magic on code placeholders like
-function argument, template parameters, etc.
-Default: 0
-
-				       	*clang_complete-snippets_engine*
-				       	*g:clang_snippets_engine*
-The snippets engine (clang_complete, ultisnips... see the snippets
-subdirectory).
-Default: "clang_complete"
-
-       				       	*clang_complete-conceal_snippets*
-       				       	*g:clang_conceal_snippets*
-Note: This option is specific to clang_complete snippets engine.
-If equal to 1, clang_complete will use vim 7.3 conceal feature to hide the
-snippet placeholders.
-
-Example of conceal configuration (see |'concealcursor'| and |'conceallevel'|
-for details): >
- " conceal in insert (i), normal (n) and visual (v) modes
- set concealcursor=inv
- " hide concealed text completely unless replacement character is defined
- set conceallevel=2
-
-Default: 1 (0 if conceal not available)
-
-       				       	*clang_complete-optional_args_in_snippets*
-       				       	*g:clang_complete_optional_args_in_snippets*
-If equal to 1, it will add optional arguments to the function call snippet.
-Snippet replaceable object will not be only the argument, but the preceding
-comma will be included as well, so you can press backspace to delete the
-optional argument, while the replaceable is selected.
-Example: foo($`T param1`, $`T param2`$`, T optional_param`)
-Default: 0
-
-       				       	*clang_complete-clang_trailing_placeholder*
-       				       	*g:clang_trailing_placeholder*
-Note: This option is specific to clang_complete snippets engine.
-If equal to 1, clang_complete will add a trailing placeholder after functions
-to let you add you continue writing code faster.
-Default: 0
-
-       				       	*clang_complete-clang_restore_cr_imap*
-       				       	*g:clang_restore_cr_imap*
-This option is used for versions of Vim without the Dictionary version of
-|maparg()| introduced in 7.3.32. The variable is executed after completion to
-restore the insert-mode map of <CR>. Occurrences of "<SID>" in the variable
-are replaced with the appropriate "<SNR>" code based on the original map.
-Default: 'iunmap <buffer> <CR>'
-
-       				       	*clang_close-preview*
-       				       	*g:clang_close_preview*
-If equal to 1, the preview window will be close automatically after a
-completion.
-Default: 0
-
        				      	*clang_complete-user_options*
        				       	*g:clang_user_options*
 Additional compilation argument passed to libclang.
@@ -267,38 +179,6 @@ Default: 0
 If clang should complete code patterns, i.e loop constructs etc.
 Default: 0
 
-					*clang_complete-jumpto_declaration_key*
-					*g:clang_jumpto_declaration_key*
-Set the key used to jump to declaration.
-Default: "<C-]>"
-Note: You could use the g:ClangGotoDeclaration() to do the same with a mapping.
-
-					*clang_complete-jumpto_declaration_in_preview_key*
-					*g:clang_jumpto_declaration_in_preview_key*
-Set the key used to jump to declaration in a preview window.
-Default: "<C-W>]"
-Note: You could use the g:ClangGotoDeclarationPreview() to do the same with a mapping.
-
-					*clang_complete-jumpto_back_key*
-					*g:clang_jumpto_back_key*
-Set the key used to jump back.
-Note: Effectively this will be remapped to <C-O>. The default value is chosen
-to be coherent with ctags implementation.
-Default: "<C-T>"
-
-					*clang_complete-make_default_keymappings*
-					*g:clang_make_default_keymappings*
-If this option is set, the default keymappings will be set by clang_complete.
-Otherwise none are set and the user will have to provide those keymappings.
-Default: 1
-
-					*clang_complete-omnicppcomplete_compliance*
-					*g:clang_omnicppcomplete_compliance*
-Omnicppcomplete compatibility mode. Keeps omni auto-completion in control of
-omnicppcomplete, disables clang's auto-completion (|g:clang_complete_auto|)
-and enables only <C-X><C-U> as main clang completion function.
-Default: 0
-
 ==============================================================================
 6. Known issues					*clang_complete-issues*
 
@@ -345,22 +225,6 @@ this does not help, keep in mind that clang_complete can cause clang to search
 for header files first in the system-wide paths and then in the ones specified
 locally in .clang_complete. Therefore you might have to add "-nostdinc" and
 the system include paths in the right order to .clang_complete.
-
-*) Only function names get completed but not the parentheses/parameters.
-
-Enable the snippets-support by adding the following lines to your .vimrc,
-for example:
-
-let g:clang_snippets = 1
-let g:clang_snippets_engine = 'clang_complete'
-
-If you have ultisnips installed, you can use
-
-let g:clang_snippets = 1
-let g:clang_snippets_engine = 'ultisnips'
-
-instead. After a completetion you can use <Tab> in normal mode to jump to the
-next parameter.
 
 *) Can I configure clang_complete to insert the text automatically when there
    is only one possibility?

@@ -46,36 +46,8 @@ function! s:ClangCompleteInit()
     return
   endif
 
-  if !exists('g:clang_auto_select')
-    let g:clang_auto_select = 0
-  endif
-
-  if !exists('g:clang_complete_auto')
-    let g:clang_complete_auto = 1
-  endif
-
-  if !exists('g:clang_close_preview')
-    let g:clang_close_preview = 0
-  endif
-
-  if !exists('g:clang_complete_copen')
-    let g:clang_complete_copen = 0
-  endif
-
-  if !exists('g:clang_hl_errors')
-    let g:clang_hl_errors = 1
-  endif
-
-  if !exists('g:clang_periodic_quickfix')
-    let g:clang_periodic_quickfix = 0
-  endif
-
   if !exists('g:clang_user_options')
     let g:clang_user_options = ''
-  endif
-
-  if !exists('g:clang_trailing_placeholder')
-    let g:clang_trailing_placeholder = 0
   endif
 
   if !exists('g:clang_compilation_database')
@@ -104,35 +76,6 @@ function! s:ClangCompleteInit()
 
   if !exists('g:clang_auto_user_options')
     let g:clang_auto_user_options = '.clang_complete, path'
-  endif
-
-  if !exists('g:clang_jumpto_declaration_key')
-    let g:clang_jumpto_declaration_key = '<C-]>'
-  endif
-
-  if !exists('g:clang_jumpto_declaration_in_preview_key')
-    let g:clang_jumpto_declaration_in_preview_key = '<C-W>]'
-  endif
-
-  if !exists('g:clang_jumpto_back_key')
-    let g:clang_jumpto_back_key = '<C-T>'
-  endif
-
-  if !exists('g:clang_make_default_keymappings')
-    let g:clang_make_default_keymappings = 1
-  endif
-
-  if !exists('g:clang_restore_cr_imap')
-    let g:clang_restore_cr_imap = 'iunmap <buffer> <CR>'
-  endif
-
-  if !exists('g:clang_omnicppcomplete_compliance')
-    let g:clang_omnicppcomplete_compliance = 0
-  endif
-
-  if g:clang_omnicppcomplete_compliance == 1
-    let g:clang_complete_auto = 0
-    let g:clang_make_default_keymappings = 0
   endif
 
   call LoadUserOptions()
