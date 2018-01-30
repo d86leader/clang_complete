@@ -19,6 +19,9 @@ def decode(value):
   except AttributeError:
     return value
 
+def snippetsFormatPlaceHolder(word):
+  return "$`%s`" % word
+
 # Check if libclang is able to find the builtin include files.
 #
 # libclang sometimes fails to correctly locate its builtin include files. This
