@@ -1,4 +1,6 @@
-This plugin uses clang for accurately completing C and C++ code.
+# ClangComplete
+
+This plugin uses clang for accurate completion of your C and C++ code. The fork focuses on removing unneccesary features and leaving only completion withouth the need to set options to remove unwanted stuff.
 
 ## Installation
 
