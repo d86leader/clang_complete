@@ -19,8 +19,6 @@ def decode(value):
   except AttributeError:
     return value
 
-def snippetsFormatPlaceHolder(word):
-  return "$`%s`" % word
 
 # Check if libclang is able to find the builtin include files.
 #
@@ -436,7 +434,8 @@ def formatResult(result):
       for optional_arg in roll_out_optional(chunk.string):
         info += optional_arg + "=?"
 
-    word += chunk_spelling
+    if not chunk.isKindPlaceHolder():
+      word += chunk_spelling
 
     info += chunk_spelling
 
