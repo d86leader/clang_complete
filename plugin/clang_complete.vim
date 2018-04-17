@@ -18,6 +18,7 @@ au FileType c.*,cpp.*,objc.*,objcpp.* call <SID>ClangCompleteInit()
 let b:clang_parameters = ''
 let b:clang_user_options = ''
 let b:my_changedtick = 0
+let b:do_not_complete = 0
 
 " Store plugin path, as this is available only when sourcing the file,
 " not during a function call.
@@ -106,6 +107,8 @@ function! s:ClangCompleteInit()
   endif
 
   if s:initClangCompletePython() != 1
+    "some failure prevented from loading. Do not use completion
+    let b:do_not_complete = 1
     return
   endif
 
@@ -312,6 +315,9 @@ function! ClangComplete(findstart, base)
 
   else
     "performing completion
+    if b:do_not_complete
+      return []
+    endif
 
     if g:clang_debug == 1
       let l:time_start = reltime()
